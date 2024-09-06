@@ -148,8 +148,8 @@ def scad_test(
     native.sh_test(
         name = name,
         size = "medium",
-        srcs = ["//bazel_tools:scad_unittest_script.sh"],
-        data = expected_stls_label + [Label("//bazel_tools:scad_unittest"), file_under_test_label] + deps_label,
+        srcs = ["//:scad_unittest_script.sh"],
+        data = expected_stls_label + [Label("//:scad_unittest"), file_under_test_label] + deps_label,
         args = [
             "--scad_file_under_test $(rootpath %s)" % file_under_test_label,
             " ".join(testcases),
