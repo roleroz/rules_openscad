@@ -127,6 +127,8 @@ def scad_test(
                                       native.package_name(),
                                       name))
 
+    print(test_label)
+
     deps_label = []
     for dep in deps:
         deps_label.append(test_label.relative(dep))
