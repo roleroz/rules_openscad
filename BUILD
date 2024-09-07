@@ -1,5 +1,3 @@
-exports_files(["scad_unittest_script.sh"])
-
 py_library(
     name = "scad_utils",
     srcs = ["scad_utils.py"],

@@ -19,13 +19,10 @@ scad_object(
 
 scad_test(
     name = "cylinder_section_test",
-    file_under_test = "cylinder_section.scad",
+    library_under_test = ":cylinder_section",
     tests = {
-        "CylinderSection(height=5,diameter=20,angle=45)": "testdata/cylinder_section/cylinder_section.stl",
+        "testdata/cylinder_section/cylinder_section.stl": "CylinderSection(height=5,diameter=20,angle=45)",
     },
-    deps = [
-        ":cylinder_section",
-    ],
 )
 
 scad_library(
@@ -42,13 +39,10 @@ scad_object(
 
 scad_test(
     name = "hardware_test",
-    file_under_test = "hardware.scad",
+    library_under_test = ":hardware",
     tests = {
-        "M2Nut(extra_thickness=1)": "testdata/hardware/m2_nut.stl",
+        "testdata/hardware/m2_nut.stl": "M2Nut(extra_thickness=1)",
     },
-    deps = [
-        ":hardware",
-    ],
 )
 
 scad_library(
@@ -72,13 +66,10 @@ scad_test(
         "HollowCylinder(length=10,wall_thickness=3)",
         "HollowCylinder(length=10)",
     ],
-    file_under_test = "hollow_cylinder.scad",
+    library_under_test = ":hollow_cylinder",
     tests = {
-        "HollowCylinder(length=10,external_diameter=3,internal_diameter=1)": "testdata/hollow_cylinder/ed_id.stl",
-        "HollowCylinder(length=10,external_diameter=3,wall_thickness=0.2)": "testdata/hollow_cylinder/ed_wt.stl",
-        "HollowCylinder(length=10,internal_diameter=5,wall_thickness=3)": "testdata/hollow_cylinder/id_wt.stl",
+        "testdata/hollow_cylinder/ed_id.stl": "HollowCylinder(length=10,external_diameter=3,internal_diameter=1)",
+        "testdata/hollow_cylinder/ed_wt.stl": "HollowCylinder(length=10,external_diameter=3,wall_thickness=0.2)",
+        "testdata/hollow_cylinder/id_wt.stl": "HollowCylinder(length=10,internal_diameter=5,wall_thickness=3)",
     },
-    deps = [
-        ":hollow_cylinder",
-    ],
 )
