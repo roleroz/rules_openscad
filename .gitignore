@@ -1,0 +1,8 @@
+.idea
+.vscode
+bazel-*
+__pycache__
+*.bak
+*-backups
+\#auto_saved_files\#
+.pio

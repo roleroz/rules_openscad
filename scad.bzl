@@ -123,11 +123,7 @@ def scad_test(
     """
 
     # Get a base label to create all other relative ones to this
-    test_label = Label("@@%s//%s:%s" % (native.module_name(),
-                                        native.package_name(),
-                                        name))
-
-    print(test_label)
+    test_label = Label("//%s:%s" % (native.package_name(), name))
 
     deps_label = []
     for dep in deps:
