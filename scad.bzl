@@ -24,7 +24,9 @@ deps_attrs = attr.label_list(
 )
 
 def _scad_library_impl(ctx):
-    files = depset(ctx.files.srcs, transitive = [dep[DefaultInfo].files for dep in ctx.attr.deps])
+    files = depset(
+        ctx.files.srcs,
+        transitive = [dep[DefaultInfo].files for dep in ctx.attr.deps])
     return [DefaultInfo(
         files = files,
         runfiles = ctx.runfiles(
@@ -62,7 +64,9 @@ def _scad_object_impl(ctx):
             " ".join([f.path for f in stl_inputs]),
         ),
     )
-    files = depset(ctx.files.srcs + [stl_output], transitive = [dep[DefaultInfo].files for dep in ctx.attr.deps])
+    files = depset(
+        ctx.files.srcs + [stl_output],
+        transitive = [dep[DefaultInfo].files for dep in ctx.attr.deps])
     return [DefaultInfo(
         files = files,
         runfiles = ctx.runfiles(
