@@ -117,7 +117,7 @@ def _scad_test_impl(ctx):
         runfiles = ctx.runfiles(
             files = [],
             transitive_files = depset(
-                direct = ctx.files.tests,
+                direct = ctx.files.tests + [unittest_script],
                 transitive = [
                     ctx.attr.library_under_test.files, 
                     depset([
