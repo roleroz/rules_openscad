@@ -6,3 +6,4 @@ __pycache__
 *-backups
 \#auto_saved_files\#
 .pio
+MODULE.bazel.lock
