@@ -1,5 +1,3 @@
-"""Definitions for the openscad_rules module"""
-
 module(
     name = "openscad_rules",
     version = "0.1",
