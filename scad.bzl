@@ -95,12 +95,13 @@ def _scad_test_impl(ctx):
     ctx.actions.write(
         output = unittest_script,
         content = " ".join([
+            "find;",
             ctx.files._unittest_binary[0].short_path,
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
             " ".join([
                 "--testcases \"%s#%s/%s\"" % (
                     testcase,
-                    golden.label.package,
+                    golden.label.package if golden.label.package else ".",
                     golden.label.name
                 ) for (golden, testcase) in ctx.attr.tests.items()]),
             " ".join([
