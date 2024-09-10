@@ -41,7 +41,7 @@ scad_library = rule(
         "deps": deps_attrs,
     },
     doc = """
-Create a 3D library to be linked by other libraries or objects
+Create a 3D library to wrap OpenSCAD code to be linked by other libraries or objects
 
 Args:
     srcs: (list[file]) List of files that compile to generate this library
@@ -162,7 +162,7 @@ is different from the golden STL for that testcase
             allow_empty = True,
             doc = """
 List of code snippets that are expected to fail an assertion. The test will fail
-if any of these don't fail their assertions
+if any of these fail to trigger an assertion
 """,
         ),
         "_unittest_binary": attr.label(
