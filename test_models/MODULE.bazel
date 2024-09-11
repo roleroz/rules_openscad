@@ -1,5 +1,5 @@
-bazel_dep(name = "openscad_rules")
+bazel_dep(name = "rules_openscad")
 local_path_override(
-    module_name = "openscad_rules",
+    module_name = "rules_openscad",
     path = "..",
 )

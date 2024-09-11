@@ -1,5 +1,5 @@
 load(
-    "@openscad_rules//:scad.bzl",
+    "@rules_openscad//:scad.bzl",
     "scad_library",
     "scad_object",
     "scad_test",

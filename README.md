@@ -13,14 +13,14 @@ In order to use these rules in your BUILD files you need to first add this modul
 ### Modify your MODULE.bazel file
 Just add the following line to your `MODULES.bazel` file
 ```
-bazel_dep(name="openscad_rules", version="0.1")
+bazel_dep(name="rules_openscad", version="0.1")
 ```
 
 ### Load the rule definitions on your BUILD files
 Once you have added the dependency to your bazel module, you need to add the following code to the `BUILD` file on which you want to use the rules
 ```
 load(
-    "@openscad_rules//:scad.bzl",
+    "@rules_openscad//:scad.bzl",
     "scad_library",
     "scad_object",
     "scad_test",
