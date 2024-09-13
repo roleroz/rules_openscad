@@ -94,8 +94,8 @@ def _scad_test_impl(ctx):
         "%s_unittest_script.sh" % ctx.label.name)
     ctx.actions.write(
         output = unittest_script,
-        content = " ".join([
-            "find;",
+        is_executable = True,
+        content = "#!/bin/bash\n" + " ".join([
             ctx.files._unittest_binary[0].short_path,
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
             " ".join([
