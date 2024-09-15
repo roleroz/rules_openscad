@@ -92,11 +92,15 @@ Args:
 def _scad_test_impl(ctx):
     unittest_script = ctx.actions.declare_file(
         "%s_unittest_script.sh" % ctx.label.name)
+    unittest_binary = ctx.files._unittest_binary[0]
+    if unittest_binary.is_source:
+        unittest_binary = ctx.files._unittest_binary[1]
     ctx.actions.write(
         output = unittest_script,
         is_executable = True,
         content = "#!/bin/bash\n" + " ".join([
-            ctx.files._unittest_binary[0].short_path,
+            "pwd; find;",
+            unittest_binary.short_path,
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
             " ".join([
                 "--testcases \"%s#%s/%s\"" % (
