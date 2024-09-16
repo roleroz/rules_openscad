@@ -5,6 +5,10 @@ import scad_utils
 
 parser = argparse.ArgumentParser(prog="scad_unittest",
                                  description="Unittest for scad libraries")
+parser.add_argument("--openscad_command",
+                    type=str,
+                    required=True,
+                    help="Command line to run openscad")
 parser.add_argument("--scad_file_under_test",
                     type=argparse.FileType('r'),
                     required=True,
@@ -51,7 +55,8 @@ for testcase in args.testcases:
     render_result, render_stderr = scad_utils.render_stl(
         "$fn=50; use <%s>; %s;" % (args.scad_file_under_test.name, code_under_test),
         args.scad_code_file,
-        args.render_stl)
+        args.render_stl,
+        args.openscad_command)
     if render_result > 0:
         logging.error("Failed to render '%s'", code_under_test)
         for line in render_stderr.split("\\n"):
@@ -63,7 +68,8 @@ for testcase in args.testcases:
                                           args.render_stl,
                                           args.scad_code_file,
                                           args.new_parts_stl,
-                                          args.missing_parts_stl)
+                                          args.missing_parts_stl,
+                                          args.openscad_command)
     if testing_result:
         logging.error("Failed testing '%s' against %s, new parts STL in %s and missing part STL in %s" % (
             code_under_test,
@@ -78,7 +84,8 @@ if args.assertion_check:
         render_result, render_stderr = scad_utils.render_stl(
             "$fn=50; use <%s>; %s;" % (args.scad_file_under_test.name, assertion_code),
             args.scad_code_file,
-            args.render_stl)
+            args.render_stl,
+            args.openscad_command)
         if "ERROR: Assertion" not in render_stderr:
             logging.error("Code didn't produce assertion")
             for line in render_stderr.split("\\n"):

@@ -22,6 +22,9 @@ deps_attrs = attr.label_list(
     doc = "Other libraries that the files on this rule depend on",
 )
 
+def _get_openscad_command(ctx):
+    return "openscad"
+
 def _scad_library_impl(ctx):
     files = depset(
         ctx.files.srcs,
@@ -58,7 +61,9 @@ def _scad_object_impl(ctx):
     ctx.actions.run_shell(
         outputs = [stl_output],
         inputs = stl_inputs + deps,
-        command = "openscad --export-format=stl -o {} {}".format(
+        use_default_shell_env = True,
+        command = "{} --export-format=stl -o {} {}".format(
+            _get_openscad_command(ctx),
             stl_output.path,
             " ".join([f.path for f in stl_inputs]),
         ),
@@ -101,6 +106,7 @@ def _scad_test_impl(ctx):
         content = "#!/bin/bash\n" + " ".join([
             "pwd; find;",
             unittest_binary.short_path,
+            "--openscad_command '%s'" % _get_openscad_command(ctx),
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
             " ".join([
                 "--testcases \"%s#%s/%s\"" % (

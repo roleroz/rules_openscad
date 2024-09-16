@@ -5,8 +5,8 @@ import subprocess
 # Runs OpenSCAD to render an STL file, input code stored in scad_file, output will be stored at output_file
 #
 # Returns the exit code of OpenSCAD when executing the provided code
-def _run_openscad(scad_file, output_file):
-    cmd = "openscad --export-format stl -o %s %s" % (output_file, scad_file)
+def _run_openscad(scad_file, output_file, openscad_command):
+    cmd = f"{openscad_command} --export-format stl -o {output_file} {scad_file}"
     logging.info("Executing OpenSCAD as '%s'" % cmd)
     cmd_output = subprocess.run(cmd, shell=True, capture_output=True)
     cmd_return_code = cmd_output.returncode
@@ -34,15 +34,16 @@ def _write_scad_code_to_file(scad_code, scad_file):
 # scad_code: The code to be rendered
 # scad_file: Filename to be used to write the code before rendering
 # output_file: Filename where to store the rendered STL file
+# openscad_command: Command that needs to be executed to run OpenSCAD
 #
 # Returns the exit status of the openscad command and the logs printed to stderr
-def render_stl(scad_code, scad_file, output_file):
+def render_stl(scad_code, scad_file, output_file, openscad_command):
     _write_scad_code_to_file(scad_code, scad_file)
-    return _run_openscad(scad_file, output_file)
+    return _run_openscad(scad_file, output_file, openscad_command)
 
 
 # Checks if the object in STL file f1 contains the object in STL file f2
-def _stl_contains_stl(f1, f2, scad_file, output_file):
+def _stl_contains_stl(f1, f2, scad_file, output_file, openscad_command):
     # Create SCAD file for diff
     _write_scad_code_to_file("difference() { import(\"%s\"); import(\"%s\");}" % (f1, f2), scad_file)
 
@@ -50,7 +51,7 @@ def _stl_contains_stl(f1, f2, scad_file, output_file):
     #
     # If f1 contains f2, then the resulting STL has no model, hence openscad return with exit code non-zero.
     # If f1 doesn't contain f2, then there is a residual model and the openscad run returns exit code 0
-    openscad_return_code, openscad_stderr = _run_openscad(scad_file, output_file)
+    openscad_return_code, openscad_stderr = _run_openscad(scad_file, output_file, openscad_command)
     if openscad_return_code > 0 and "Current top level object is empty" in openscad_stderr:
         return True
     for line in openscad_stderr.split("\\n"):
@@ -64,14 +65,15 @@ def _stl_contains_stl(f1, f2, scad_file, output_file):
 # scad_file: File where to write the scad code that will be used to diff the provided STL files
 # new_parts_stl: File where to store an STL with parts that exist in actual_stl, but don't in expected_stl
 # missing_parts_stl: File where to store an STL with parts that exist in expected_stl, but don't in actual_stl
-def diff_stls(expected_stl, actual_stl, scad_file, new_parts_stl, missing_parts_stl):
+# openscad_command: Command that needs to be executed to run OpenSCAD
+def diff_stls(expected_stl, actual_stl, scad_file, new_parts_stl, missing_parts_stl, openscad_command):
     logging.info("Comparing STL in %s with expected value in %s", actual_stl, expected_stl)
     logging.info("Looking for new areas in the STL")
-    if not _stl_contains_stl(actual_stl, expected_stl, scad_file, new_parts_stl):
+    if not _stl_contains_stl(actual_stl, expected_stl, scad_file, new_parts_stl, openscad_command):
         logging.error("New areas located in the STL")
         return True
     logging.info("Looking for missing areas in the STL")
-    if not _stl_contains_stl(expected_stl, actual_stl, scad_file, missing_parts_stl):
+    if not _stl_contains_stl(expected_stl, actual_stl, scad_file, missing_parts_stl, openscad_command):
         logging.error("Missing areas in the STL")
         return True
     return False
