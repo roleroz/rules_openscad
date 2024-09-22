@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import sys
 import scad_utils
 
@@ -42,6 +43,10 @@ parser.add_argument("--missing_parts_stl",
 args = parser.parse_args()
 
 logging.getLogger().setLevel(logging.INFO)
+
+logging.info("Unittest run parameters")
+for arg, value in vars(args).items():
+    logging.info(f"--{arg} {value}")
 
 logging.info(args.testcases)
 for testcase in args.testcases:
