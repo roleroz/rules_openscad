@@ -95,6 +95,7 @@ Args:
 )
 
 def _scad_test_impl(ctx):
+    # Create the execution environment to run the test
     unittest_script = ctx.actions.declare_file(
         "%s_unittest_script.sh" % ctx.label.name)
     unittest_binary = ctx.files._unittest_binary[0]
@@ -104,7 +105,7 @@ def _scad_test_impl(ctx):
         output = unittest_script,
         is_executable = True,
         content = "#!/bin/bash\n" + " ".join([
-            "pwd; find;",
+            "env; pwd; find;",
             unittest_binary.short_path,
             "--openscad_command '%s'" % _get_openscad_command(ctx),
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
@@ -118,11 +119,13 @@ def _scad_test_impl(ctx):
                 "--assertion_check \"%s\"" % assertion
                 for assertion in ctx.attr.assertions]),
             "--scad_code_file scad.code",
-            "--render_stl render.stl",
-            "--new_parts_stl new_parts.stl",
-            "--missing_parts_stl missing_parts.stl",
+            "--render_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/render.stl",
+            "--new_parts_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/new_parts.stl",
+            "--missing_parts_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/missing_parts.stl",
         ])
     )
+
+    # The test will be executed once we create the DefaultInfo object
     return [DefaultInfo(
         executable = unittest_script,
         runfiles = ctx.runfiles(
