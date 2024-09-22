@@ -126,24 +126,27 @@ def _scad_test_impl(ctx):
     )
 
     # The test will be executed once we create the DefaultInfo object
-    return [DefaultInfo(
-        executable = unittest_script,
-        runfiles = ctx.runfiles(
-            files = [],
-            transitive_files = depset(
-                direct = ctx.files.tests + [unittest_script],
-                transitive = [
-                    ctx.attr.library_under_test.files, 
-                    depset([
-                        ctx.attr._unittest_binary[PyRuntimeInfo].interpreter,
-                    ]),
-                    ctx.attr._unittest_binary.files,
-                    ctx.attr._unittest_binary[PyInfo].transitive_sources,
-                    ctx.attr._unittest_binary[PyRuntimeInfo].files,
-                ],
+    return [
+        DefaultInfo(
+            executable = unittest_script,
+            runfiles = ctx.runfiles(
+                files = [],
+                transitive_files = depset(
+                    direct = ctx.files.tests + [unittest_script],
+                    transitive = [
+                        ctx.attr.library_under_test.files, 
+                        depset([
+                            ctx.attr._unittest_binary[PyRuntimeInfo].interpreter,
+                        ]),
+                        ctx.attr._unittest_binary.files,
+                        ctx.attr._unittest_binary[PyInfo].transitive_sources,
+                        ctx.attr._unittest_binary[PyRuntimeInfo].files,
+                    ],
+                ),
             ),
         ),
-    )]
+        RunEnvironmentInfo({"APPIMAGE_EXTRACT_AND_RUN": "1"}),
+    ]
 
 scad_test = rule(
     implementation = _scad_test_impl,
