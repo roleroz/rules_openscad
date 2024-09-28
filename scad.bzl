@@ -22,8 +22,12 @@ deps_attrs = attr.label_list(
     doc = "Other libraries that the files on this rule depend on",
 )
 
-def _get_openscad_command(ctx):
-    return "openscad"
+def _get_openscad_executable(ctx):
+    for file in ctx.attr._openscad_files.files.to_list():
+        if file.basename == "AppRun":
+            # The OpenSCAD version is an AppImage, this file is the entrypoint
+            return file
+    return "OS not supported"
 
 def _scad_library_impl(ctx):
     files = depset(
@@ -58,15 +62,16 @@ def _scad_object_impl(ctx):
     deps = []
     for one_transitive_dep in [dep[DefaultInfo].files for dep in ctx.attr.deps]:
         deps += one_transitive_dep.to_list()
-    ctx.actions.run_shell(
+    ctx.actions.run(
         outputs = [stl_output],
         inputs = stl_inputs + deps,
-        use_default_shell_env = True,
-        command = "{} --export-format=stl -o {} {}".format(
-            _get_openscad_command(ctx),
-            stl_output.path,
-            " ".join([f.path for f in stl_inputs]),
-        ),
+        executable = _get_openscad_executable(ctx),
+        tools = ctx.attr._openscad_files.files,
+        # use_default_shell_env = True,
+        arguments = [
+            "--export-format=stl",
+            "-o%s" % stl_output.path,
+        ] + [input.short_path for input in stl_inputs],
     )
     files = depset(
         ctx.files.srcs + [stl_output],
@@ -84,6 +89,10 @@ scad_object = rule(
     attrs = {
         "srcs": srcs_attrs,
         "deps": deps_attrs,
+        "_openscad_files": attr.label(
+            default = Label("//:openscad"),
+            cfg = "exec",
+        ),
     },
     doc = """
 Create a 3D object based on the provided code and libraries
@@ -105,9 +114,9 @@ def _scad_test_impl(ctx):
         output = unittest_script,
         is_executable = True,
         content = "#!/bin/bash\n" + " ".join([
-            "env; pwd; find;",
+            "env; pwd; find -type f; find -type l;",
             unittest_binary.short_path,
-            "--openscad_command '%s'" % _get_openscad_command(ctx),
+            "--openscad_command '%s'" % _get_openscad_executable(ctx).path,
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
             " ".join([
                 "--testcases \"%s#%s/%s\"" % (
@@ -141,6 +150,7 @@ def _scad_test_impl(ctx):
                         ctx.attr._unittest_binary.files,
                         ctx.attr._unittest_binary[PyInfo].transitive_sources,
                         ctx.attr._unittest_binary[PyRuntimeInfo].files,
+                        ctx.attr._openscad_files.files,
                     ],
                 ),
             ),
@@ -185,6 +195,10 @@ if any of these fail to trigger an assertion
         "_unittest_binary": attr.label(
             default = Label("//:scad_unittest"),
             executable = True,
+            cfg = "exec",
+        ),
+        "_openscad_files": attr.label(
+            default = Label("//:openscad"),
             cfg = "exec",
         ),
     },

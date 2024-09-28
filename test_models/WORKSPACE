@@ -2,3 +2,6 @@ local_repository(
     name = "rules_openscad",
     path = "../",
 )
+
+load("@rules_openscad//:openscad_files.bzl", "define_openscad_versions")
+define_openscad_versions()

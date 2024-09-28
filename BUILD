@@ -22,3 +22,15 @@ py_binary(
         ":scad_utils",
     ],
 )
+
+alias(
+    name = "openscad",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@openscad_linux_x86_64//:files",
+        "@bazel_tools//src/conditions:linux_aarch64": "@openscad_linux_aarch64//:files",
+        # Add the following lines when we support MacOS and Windows
+        # "@bazel_tools//src/conditions:darwin" : ":openscad_darwin",
+        # "@bazel_tools//src/conditions:windows" : ":openscad_windows",
+    }),
+    visibility = ["//visibility:public"],
+)
