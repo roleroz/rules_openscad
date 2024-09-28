@@ -4,16 +4,29 @@ This module contains a set of rules compile 3D models written in OpenSCAD code t
 - [scad_object](#scad_object): Code that defines an specific 3D model. When built, this library generates an STL file
 - [scad_test](#scad_test): Unit-testing framework for libraries. Both compares the result of code using the library with golden STLs, but also ensures that invalid uses of the library assert out
 
-## Prerequisites
-These rules need OpenSCAD to be installed on your machine, and available within the path
-
 ## Setup
-In order to use these rules in your BUILD files you need to first add this module as a dependency on your `MODULES.bazel` file, and then add the rules to your `BUILD` file
+In order to use these rules in your BUILD files you need to first add this module as a dependency on your `MODULES.bazel` or `WORKSPACE` file, and then add the rules to your `BUILD` file
 
-### Modify your MODULE.bazel file
+### Add the module dependency
+
+#### Modify your MODULE.bazel file (if using bazel 7)
 Just add the following line to your `MODULES.bazel` file
 ```
 bazel_dep(name="rules_openscad", version="0.1")
+```
+
+#### Modify your WORKSPACE file (if using bazel 6)
+Just add the following line to your `WORKSPACE` file
+```
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+git_repository(
+    name = "rules_openscad",
+    remote = "https://github.com/roleroz/rules_openscad.git",
+    tag = "v0.2",
+)
+
+load("@rules_openscad//:openscad_files.bzl", "define_openscad_versions")
+define_openscad_versions()
 ```
 
 ### Load the rule definitions on your BUILD files
@@ -110,4 +123,4 @@ scad_test(
 ## Usage
 
 ### Render an object into an STL
-`bazel build //path/to:object` will render that object as an STL and store it in the `bazel-out` directory, at `bazel-out/k8-fastbuild/bin/path/to/object.stl`
+`bazel build //path/to:object` will render that object as an STL and store it in the `bazel-bin` directory, at `bazel-bin/path/to/object.stl`
