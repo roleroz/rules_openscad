@@ -1,3 +1,11 @@
+"""Library to define the OpenSCAD versions to fetch per OS
+
+In WORKSPACE world (bazel 6 and earlier) every user of a library needs to load
+all the transitive dependencies of all libraries under use, so this file
+contains a method that defines the OpenSCAD binary dependencies both for this
+repo as well as for any user.
+"""
+
 load("//:http_appimage.bzl", "http_appimage")
 
 def define_openscad_versions():

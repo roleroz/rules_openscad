@@ -1,3 +1,5 @@
+"""Set of rules to build and test OpenSCAD code through bazel"""
+
 module(
     name = "rules_openscad",
     version = "0.2",

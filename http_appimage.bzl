@@ -1,3 +1,5 @@
+"""Library to fetch AppImage files through http and extract them"""
+
 # Repository rule to fetch an AppImage file from a URL and extract it into a
 # directory
 def _http_appimage_impl(ctx):
