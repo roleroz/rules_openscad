@@ -24,3 +24,10 @@ py_binary(
         ":scad_utils",
     ],
 )
+
+stardoc(
+    name = "docs",
+    input = "scad.bzl",
+    out = "scad.md",
+    tags = ["manual"],
+)
