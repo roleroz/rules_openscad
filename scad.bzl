@@ -49,7 +49,10 @@ Create a 3D library to wrap OpenSCAD code to be linked by other libraries or obj
 )
 
 def _scad_object_impl(ctx):
-    stl_output = ctx.actions.declare_file(ctx.label.name + ".stl")
+    if ctx.outputs.out:
+        stl_output = ctx.actions.declare_file(ctx.outputs.out.basename)
+    else:
+        stl_output = ctx.actions.declare_file(ctx.label.name + ".stl")
     stl_inputs = ctx.files.srcs
     deps = []
     for one_transitive_dep in [dep[DefaultInfo].files for dep in ctx.attr.deps]:
@@ -80,6 +83,9 @@ scad_object = rule(
     attrs = {
         "srcs": srcs_attrs,
         "deps": deps_attrs,
+        "out": attr.output(
+            doc = "The name of the generated file.",
+        ),
     },
     doc = """
 Create a 3D object based on the provided code and libraries

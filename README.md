@@ -32,6 +32,8 @@ After this, you can use the rules the same way that you would use any other Baze
 
 ## Rules reference
 
+<a id="scad_library"></a>
+
 ### scad_library
 
 <pre>
@@ -59,7 +61,7 @@ Create a 3D library to wrap OpenSCAD code to be linked by other libraries or obj
 <pre>
 load("@rules_openscad//:scad.bzl", "scad_object")
 
-scad_object(<a href="#scad_object-name">name</a>, <a href="#scad_object-deps">deps</a>, <a href="#scad_object-srcs">srcs</a>)
+scad_object(<a href="#scad_object-name">name</a>, <a href="#scad_object-deps">deps</a>, <a href="#scad_object-srcs">srcs</a>, <a href="#scad_object-out">out</a>)
 </pre>
 
 Create a 3D object based on the provided code and libraries
@@ -72,6 +74,7 @@ Create a 3D object based on the provided code and libraries
 | <a id="scad_object-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="scad_object-deps"></a>deps |  Other libraries that the files on this rule depend on   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="scad_object-srcs"></a>srcs |  Filenames for the files that are included in this rule   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+| <a id="scad_object-out"></a>out |  The name of the generated file.   | <a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a> | optional |  `None`  |
 
 
 <a id="scad_test"></a>

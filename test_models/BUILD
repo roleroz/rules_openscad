@@ -18,6 +18,13 @@ scad_object(
     deps = [":cylinder_section"],
 )
 
+scad_object(
+    name = "cylinder_section_obj_rename",
+    srcs = ["cylinder_section_obj.scad"],
+    out = "other.stl",
+    deps = [":cylinder_section"],
+)
+
 scad_test(
     name = "cylinder_section_test",
     library_under_test = ":cylinder_section",
@@ -79,6 +86,7 @@ build_test(
     name = "objects_build_test",
     targets = [
         ":cylinder_section_obj",
+        ":other.stl",
         ":hardware_obj",
         ":hollow_cylinder_obj",
     ],
