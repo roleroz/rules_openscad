@@ -33,43 +33,57 @@ After this, you can use the rules the same way that you would use any other Baze
 ## Rules reference
 
 ### scad_library
+
+<pre>
+load("@rules_openscad//:scad.bzl", "scad_library")
+
+scad_library(<a href="#scad_library-name">name</a>, <a href="#scad_library-deps">deps</a>, <a href="#scad_library-srcs">srcs</a>)
+</pre>
+
 Create a 3D library to wrap OpenSCAD code to be linked by other libraries or objects
 
-|Parameter|Type|Description
-|-|-|-
-|srcs|list[file]|List of files that compile to generate this library
-|deps|list[target]|Other libraries this library depends on
+**ATTRIBUTES**
 
-#### Example library
-```
-scad_library(
-    name = "hollow_cylinder",
-    srcs = ["hollow_cylinder.scad"],
-    deps = [
-        ":some_library",
-    ],
-    visibility = ["//visibility:public"],
-)
-```
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="scad_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="scad_library-deps"></a>deps |  Other libraries that the files on this rule depend on   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scad_library-srcs"></a>srcs |  Filenames for the files that are included in this rule   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+
+
+<a id="scad_object"></a>
 
 ### scad_object
+
+<pre>
+load("@rules_openscad//:scad.bzl", "scad_object")
+
+scad_object(<a href="#scad_object-name">name</a>, <a href="#scad_object-deps">deps</a>, <a href="#scad_object-srcs">srcs</a>)
+</pre>
+
 Create a 3D object based on the provided code and libraries
 
-|Parameter|Type|Description
-|-|-|-
-|srcs|list[file]|List of files that compile to generate this object
-|deps|list[target]|List of libraries this object depends on
+**ATTRIBUTES**
 
-#### Example object
-```
-scad_object(
-    name = "hollow_cylinder_obj",
-    srcs = ["hollow_cylinder_obj.scad"],
-    deps = [":hollow_cylinder"],
-)
-```
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="scad_object-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="scad_object-deps"></a>deps |  Other libraries that the files on this rule depend on   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="scad_object-srcs"></a>srcs |  Filenames for the files that are included in this rule   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+
+
+<a id="scad_test"></a>
 
 ### scad_test
+
+<pre>
+load("@rules_openscad//:scad.bzl", "scad_test")
+
+scad_test(<a href="#scad_test-name">name</a>, <a href="#scad_test-assertions">assertions</a>, <a href="#scad_test-library_under_test">library_under_test</a>, <a href="#scad_test-tests">tests</a>)
+</pre>
+
 Test for 3D objects and libraries
 
 The test works by compiling the code provided in the tests attribute, and
@@ -80,11 +94,15 @@ defined equal if A-B is empty (B includes A) and B-A is empty (A includes B)
 The test also checks that assertions are triggered for all the code provided in
 the assertions list
 
-|Parameter|Type|Description
-|-|-|-
-|library_under_test|label|Library that will be imported when compiling any code under test
-|tests|dict[label][string]|List of testcases. The key is the filename of the golden STL for this testcase, and the value is the code under test (which object will be compiled) without the library under test being imported (that's done by the framework)<br/><br/>The test will fail if any of the code snippets under test create a result that is different from the golden STL for that testcase</p>
-|assertions|list[string]|List of code snippets that are expected to fail an assertion. The test will fail if any of these fail to trigger an assertion
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="scad_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="scad_test-assertions"></a>assertions |  List of code snippets that are expected to fail an assertion. The test will fail if any of these fail to trigger an assertion   | List of strings | optional |  `[]`  |
+| <a id="scad_test-library_under_test"></a>library_under_test |  Library that will be imported when compiling any code under test   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="scad_test-tests"></a>tests |  List of testcases. The key is the filename of the golden STL for this testcase, and the value is the code under test (which object will be compiled) without the library under test being imported (that's done by the  framework)<br><br>The test will fail if any of the code snippets under test create a result that is different from the golden STL for that testcase   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | required |  |
 
 
 #### Example test

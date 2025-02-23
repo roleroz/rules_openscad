@@ -1,3 +1,5 @@
+load("@stardoc//stardoc:stardoc.bzl", "stardoc")
+
 py_library(
     name = "scad_utils",
     srcs = ["scad_utils.py"],
