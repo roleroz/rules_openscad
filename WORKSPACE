@@ -1,6 +1,3 @@
-load("openscad_files.bzl", "define_openscad_versions")
-define_openscad_versions()
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
