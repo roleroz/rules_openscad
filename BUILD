@@ -40,7 +40,16 @@ py_binary(
     ],
 )
 
-exports_files(["scad.bzl"])
+exports_files([
+    "scad.bzl",
+    "toolchain.bzl",
+])
+
+# The type of the optional OpenSCAD toolchain (toolchain.bzl).
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
 
 # The sources of this workspace, for //tests/bazel_versions to copy and build with other Bazel
 # versions
