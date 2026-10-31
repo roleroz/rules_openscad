@@ -3,3 +3,10 @@ module(
     version = "0.1",
     compatibility_level = 0,
 )
+
+# py_binary and the Python providers. Bazel 9 has them only in rules_python.
+bazel_dep(name = "rules_python", version = "2.4.6")
+
+# The README's rule reference (bazel run //docs:docs). Dev only: a user of
+# the module does not build the docs.
+bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True)

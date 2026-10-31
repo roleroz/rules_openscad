@@ -1,4 +1,4 @@
-load("@stardoc//stardoc:stardoc.bzl", "stardoc")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 
 py_library(
     name = "scad_utils",
@@ -25,9 +25,4 @@ py_binary(
     ],
 )
 
-stardoc(
-    name = "docs",
-    input = "scad.bzl",
-    out = "scad.md",
-    tags = ["manual"],
-)
+exports_files(["scad.bzl"])

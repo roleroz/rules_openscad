@@ -96,9 +96,7 @@ def _scad_test_impl(ctx):
     # Create the execution environment to run the test
     unittest_script = ctx.actions.declare_file(
         "%s_unittest_script.sh" % ctx.label.name)
-    unittest_binary = ctx.files._unittest_binary[0]
-    if unittest_binary.is_source:
-        unittest_binary = ctx.files._unittest_binary[1]
+    unittest_binary = ctx.executable._unittest_binary
     ctx.actions.write(
         output = unittest_script,
         is_executable = True,
@@ -123,24 +121,14 @@ def _scad_test_impl(ctx):
         ])
     )
 
-    # The test will be executed once we create the DefaultInfo object
+    # The test will be executed once we create the DefaultInfo object. The
+    # unittest binary brings its own runfiles: its interpreter and sources.
     return [DefaultInfo(
         executable = unittest_script,
         runfiles = ctx.runfiles(
-            files = [],
-            transitive_files = depset(
-                direct = ctx.files.tests + [unittest_script],
-                transitive = [
-                    ctx.attr.library_under_test.files, 
-                    depset([
-                        ctx.attr._unittest_binary[PyRuntimeInfo].interpreter,
-                    ]),
-                    ctx.attr._unittest_binary.files,
-                    ctx.attr._unittest_binary[PyInfo].transitive_sources,
-                    ctx.attr._unittest_binary[PyRuntimeInfo].files,
-                ],
-            ),
-        ),
+            files = ctx.files.tests + [unittest_script],
+            transitive_files = ctx.attr.library_under_test.files,
+        ).merge(ctx.attr._unittest_binary[DefaultInfo].default_runfiles),
     )]
 
 scad_test = rule(
