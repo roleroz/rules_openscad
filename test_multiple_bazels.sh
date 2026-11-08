@@ -1,9 +1,13 @@
 #!/bin/bash
 
-BAZEL_BINARIES=`find ${PATH//:/ } -maxdepth 1 -executable -type f | rev | cut -d '/' -f 1 | rev | grep -e  "^bazel" | sort | uniq | grep -v bazel-real`
+# BAZEL_BINARIES=`find ${PATH//:/ } -maxdepth 1 -executable -type f | rev | cut -d '/' -f 1 | rev | grep -e  "^bazel" | sort | uniq | grep -v bazel-real`
+SUPPORTED_VERSIONS="7"
+BAZEL=bazel
 
-for BAZEL in ${BAZEL_BINARIES}; do
-    echo "Testing with binary ${BAZEL}, version $(${BAZEL} --version)"
+# for BAZEL in ${BAZEL_BINARIES}; do
+for VERSION in ${SUPPORTED_VERSIONS}; do
+    export USE_BAZEL_VERSION="${VERSION}.x"
+    echo "Testing with version $(${BAZEL} --version)"
     echo "Testing local directory"
     ${BAZEL} clean
     ${BAZEL} build :all || exit 1
@@ -18,6 +22,7 @@ for BAZEL in ${BAZEL_BINARIES}; do
 done
 
 echo "Test passed with the following bazel versions"
-for BAZEL in ${BAZEL_BINARIES}; do
+for VERSION in ${SUPPORTED_VERSIONS}; do
+    export USE_BAZEL_VERSION="${VERSION}.x"
     echo "- $(${BAZEL} --version)"
 done
