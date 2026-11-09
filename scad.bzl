@@ -101,7 +101,6 @@ def _scad_test_impl(ctx):
         output = unittest_script,
         is_executable = True,
         content = "#!/bin/bash\n" + " ".join([
-            "env; pwd; find;",
             unittest_binary.short_path,
             "--openscad_command '%s'" % _get_openscad_command(ctx),
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
