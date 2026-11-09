@@ -65,15 +65,28 @@ def _stl_contains_stl(f1, f2, scad_file, output_file, openscad_command):
 # scad_file: File where to write the scad code that will be used to diff the provided STL files
 # new_parts_stl: File where to store an STL with parts that exist in actual_stl, but don't in expected_stl
 # missing_parts_stl: File where to store an STL with parts that exist in expected_stl, but don't in actual_stl
+# diff_stl: File where to store an STL with both the new and the missing parts, written only if
+#   the STLs are different
 # openscad_command: Command that needs to be executed to run OpenSCAD
-def diff_stls(expected_stl, actual_stl, scad_file, new_parts_stl, missing_parts_stl, openscad_command):
+def diff_stls(expected_stl, actual_stl, scad_file, new_parts_stl, missing_parts_stl, diff_stl,
+              openscad_command):
     logging.info("Comparing STL in %s with expected value in %s", actual_stl, expected_stl)
+    # Run both comparisons even if the first one finds a difference, so that both the new parts
+    # and the missing parts STLs exist for debugging a failure.
+    # A comparison only writes its output file when it finds a difference, so the files to
+    # combine in diff_stl are the ones whose comparison failed.
+    parts_stls = []
     logging.info("Looking for new areas in the STL")
     if not _stl_contains_stl(actual_stl, expected_stl, scad_file, new_parts_stl, openscad_command):
         logging.error("New areas located in the STL")
-        return True
+        parts_stls.append(new_parts_stl)
     logging.info("Looking for missing areas in the STL")
     if not _stl_contains_stl(expected_stl, actual_stl, scad_file, missing_parts_stl, openscad_command):
         logging.error("Missing areas in the STL")
-        return True
-    return False
+        parts_stls.append(missing_parts_stl)
+    if not parts_stls:
+        return False
+    imports = " ".join("import(\"%s\");" % stl for stl in parts_stls)
+    _write_scad_code_to_file("union() { %s }" % imports, scad_file)
+    _run_openscad(scad_file, diff_stl, openscad_command)
+    return True

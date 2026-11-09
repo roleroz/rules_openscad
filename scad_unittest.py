@@ -40,6 +40,10 @@ parser.add_argument("--missing_parts_stl",
                     type=str,
                     required=True,
                     help="Output STL file with missing sections")
+parser.add_argument("--diff_stl",
+                    type=str,
+                    required=True,
+                    help="Output STL file with both the new and the missing sections")
 args = parser.parse_args()
 
 logging.getLogger().setLevel(logging.INFO)
@@ -74,13 +78,25 @@ for testcase in args.testcases:
                                           args.scad_code_file,
                                           args.new_parts_stl,
                                           args.missing_parts_stl,
+                                          args.diff_stl,
                                           args.openscad_command)
     if testing_result:
-        logging.error("Failed testing '%s' against %s, new parts STL in %s and missing part STL in %s" % (
-            code_under_test,
-            expected_stl,
-            args.new_parts_stl,
-            args.missing_parts_stl))
+        logging.error("Failed testing '%s' against %s" % (code_under_test, expected_stl))
+        # OpenSCAD only writes these when the corresponding comparison found a difference, so
+        # report just the ones that exist.
+        for description, stl in (("rendered STL", args.render_stl),
+                                 ("new parts STL", args.new_parts_stl),
+                                 ("missing parts STL", args.missing_parts_stl),
+                                 ("STL with both new and missing parts", args.diff_stl)):
+            if os.path.exists(stl):
+                logging.error("The %s is %s" % (description, os.path.basename(stl)))
+        # The output files are written inside the test sandbox, which is deleted when the test
+        # ends, so point at where Bazel leaves them in the invoker's workspace instead. That
+        # location depends only on the test's label, so it is also right under remote execution.
+        package, _, name = os.environ.get("TEST_TARGET", "").split("//")[-1].partition(":")
+        logging.error("These files will be in bazel-testlogs/%s/test.outputs/ (inside "
+                      "outputs.zip, unless run with --nozip_undeclared_test_outputs)" %
+                      os.path.join(package, name))
         sys.exit(1)
 
 if args.assertion_check:

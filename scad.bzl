@@ -120,6 +120,7 @@ def _scad_test_impl(ctx):
             "--render_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/render.stl",
             "--new_parts_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/new_parts.stl",
             "--missing_parts_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/missing_parts.stl",
+            "--diff_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/diff.stl",
         ])
     )
 

@@ -1,0 +1,3 @@
+# Leave the files a failing scad_test writes (rendered and diff STLs) unzipped in
+# bazel-testlogs/<package>/<test>/test.outputs/, so they can be opened directly.
+test --nozip_undeclared_test_outputs
