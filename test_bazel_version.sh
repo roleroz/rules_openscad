@@ -26,6 +26,14 @@ set -euo pipefail
     # bazelisk reads this to pick the Bazel to run
     export USE_BAZEL_VERSION="$requested_version"
 
+    # Call bazelisk by name, never `bazel`: the Bazel running this test puts its own binary first
+    # on the PATH it passes down, so `bazel` would be that very version and ignore
+    # USE_BAZEL_VERSION.
+    if ! command -v bazelisk > /dev/null; then
+        echo "ERROR: bazelisk is needed to pick the Bazel version, but is not on the PATH" >&2
+        exit 1
+    fi
+
     # Where Bazel put the sources of this test and of the test_models repo (see MODULE.bazel)
     srcdir="${TEST_SRCDIR:?must run as a Bazel test}"
     root_src="${srcdir}/${TEST_WORKSPACE:?}"
@@ -62,7 +70,7 @@ set -euo pipefail
     repository_cache="${HOME:?}/.cache/bazel/_bazel_${USER:?}/cache/repos/v1"
 
     run_bazel() {
-        bazel "--output_user_root=${output_user_root}" "$@"
+        bazelisk "--output_user_root=${output_user_root}" "$@"
     }
 
     shutdown_servers() {
@@ -74,10 +82,10 @@ set -euo pipefail
     trap shutdown_servers EXIT
 
     # --version is not a startup option, so it cannot be combined with the ones run_bazel adds
-    version_output=$(cd "$work" && bazel --version)
+    version_output=$(cd "$work" && bazelisk --version)
     echo "Testing with ${version_output}"
     # bazelisk silently falls back to .bazelversion or the latest release if it does not
-    # understand the request, and a plain bazel ignores it altogether
+    # understand the request
     if [[ "$version_output" != "bazel ${requested_version%.x}."* ]]; then
         echo "ERROR: wanted Bazel ${requested_version}, got '${version_output}'" >&2
         exit 1

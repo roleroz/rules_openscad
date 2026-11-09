@@ -39,7 +39,7 @@ exports_files(["scad.bzl"])
 # this workspace and as a dependency of test_models. Each downloads Bazel and its dependencies,
 # hence `live`; `manual` keeps them out of `bazel test //...`, and with that out of the nested
 # Bazel's own wildcard runs, so they can never end up running themselves.
-SUPPORTED_BAZEL_MAJOR_VERSIONS = [7]
+SUPPORTED_BAZEL_MAJOR_VERSIONS = [7, 8]
 
 filegroup(
     name = "bazel_version_test_sources",
