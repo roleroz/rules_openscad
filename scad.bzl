@@ -96,9 +96,7 @@ def _scad_test_impl(ctx):
     # Create the execution environment to run the test
     unittest_script = ctx.actions.declare_file(
         "%s_unittest_script.sh" % ctx.label.name)
-    unittest_binary = ctx.files._unittest_binary[0]
-    if unittest_binary.is_source:
-        unittest_binary = ctx.files._unittest_binary[1]
+    unittest_binary = ctx.executable._unittest_binary
     ctx.actions.write(
         output = unittest_script,
         is_executable = True,

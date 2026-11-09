@@ -25,7 +25,6 @@ filegroup(
         "*.scad",
         "BUILD",
         "MODULE.bazel",
-        "WORKSPACE",
         "testdata/**",
     ]),
     visibility = ["//visibility:public"],
