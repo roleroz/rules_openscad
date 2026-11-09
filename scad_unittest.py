@@ -40,6 +40,10 @@ parser.add_argument("--missing_parts_stl",
                     type=str,
                     required=True,
                     help="Output STL file with missing sections")
+parser.add_argument("--tolerance",
+                    type=float,
+                    required=True,
+                    help="Differences between STLs thinner than this are ignored")
 parser.add_argument("--diff_stl",
                     type=str,
                     required=True,
@@ -79,6 +83,7 @@ for testcase in args.testcases:
                                           args.new_parts_stl,
                                           args.missing_parts_stl,
                                           args.diff_stl,
+                                          args.tolerance,
                                           args.openscad_command)
     if testing_result:
         logging.error("Failed testing '%s' against %s" % (code_under_test, expected_stl))

@@ -42,10 +42,23 @@ def render_stl(scad_code, scad_file, output_file, openscad_command):
     return _run_openscad(scad_file, output_file, openscad_command)
 
 
-# Checks if the object in STL file f1 contains the object in STL file f2
-def _stl_contains_stl(f1, f2, scad_file, output_file, openscad_command):
+# Checks if the object in STL file f1 contains the object in STL file f2, give or take tolerance
+#
+# Any part of f1 that sticks out of f2 by more than tolerance is written to output_file.
+#
+# Comparing the meshes exactly would make the result depend on how many digits the STL stores
+# (a golden file written by one OpenSCAD version never matches the render of another one), so
+# f1 is compared against f2 together with copies of f2 shifted by tolerance along every
+# combination of the axes. That covers a skin of thickness tolerance around f2 using only
+# boolean operations, whose cost grows linearly with the model. minkowski() with a cube would
+# be exact, but it did not finish in minutes on a model with 24,000 facets.
+def _stl_contains_stl(f1, f2, tolerance, scad_file, output_file, openscad_command):
     # Create SCAD file for diff
-    _write_scad_code_to_file("difference() { import(\"%s\"); import(\"%s\");}" % (f1, f2), scad_file)
+    _write_scad_code_to_file(
+        "difference() { import(\"%s\"); union() { "
+        "for (sx=[-1,0,1], sy=[-1,0,1], sz=[-1,0,1]) translate(%r*[sx,sy,sz]) import(\"%s\"); "
+        "}}" % (f1, tolerance, f2),
+        scad_file)
 
     # Use OpenSCAD to diff
     #
@@ -67,9 +80,10 @@ def _stl_contains_stl(f1, f2, scad_file, output_file, openscad_command):
 # missing_parts_stl: File where to store an STL with parts that exist in expected_stl, but don't in actual_stl
 # diff_stl: File where to store an STL with both the new and the missing parts, written only if
 #   the STLs are different
+# tolerance: Differences that are thinner than this (in the units of the STLs) are ignored
 # openscad_command: Command that needs to be executed to run OpenSCAD
 def diff_stls(expected_stl, actual_stl, scad_file, new_parts_stl, missing_parts_stl, diff_stl,
-              openscad_command):
+              tolerance, openscad_command):
     logging.info("Comparing STL in %s with expected value in %s", actual_stl, expected_stl)
     # Run both comparisons even if the first one finds a difference, so that both the new parts
     # and the missing parts STLs exist for debugging a failure.
@@ -77,11 +91,11 @@ def diff_stls(expected_stl, actual_stl, scad_file, new_parts_stl, missing_parts_
     # combine in diff_stl are the ones whose comparison failed.
     parts_stls = []
     logging.info("Looking for new areas in the STL")
-    if not _stl_contains_stl(actual_stl, expected_stl, scad_file, new_parts_stl, openscad_command):
+    if not _stl_contains_stl(actual_stl, expected_stl, tolerance, scad_file, new_parts_stl, openscad_command):
         logging.error("New areas located in the STL")
         parts_stls.append(new_parts_stl)
     logging.info("Looking for missing areas in the STL")
-    if not _stl_contains_stl(expected_stl, actual_stl, scad_file, missing_parts_stl, openscad_command):
+    if not _stl_contains_stl(expected_stl, actual_stl, tolerance, scad_file, missing_parts_stl, openscad_command):
         logging.error("Missing areas in the STL")
         parts_stls.append(missing_parts_stl)
     if not parts_stls:

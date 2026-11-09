@@ -3,6 +3,16 @@ py_library(
     srcs = ["scad_utils.py"],
 )
 
+py_test(
+    name = "scad_utils_test",
+    srcs = ["scad_utils_test.py"],
+    main = "scad_utils_test.py",
+    tags = ["requires-openscad"],
+    deps = [
+        ":scad_utils",
+    ],
+)
+
 py_binary(
     name = "scad_unittest",
     srcs = ["scad_unittest.py"],

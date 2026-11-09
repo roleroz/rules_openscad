@@ -121,6 +121,7 @@ def _scad_test_impl(ctx):
             "--new_parts_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/new_parts.stl",
             "--missing_parts_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/missing_parts.stl",
             "--diff_stl ${TEST_UNDECLARED_OUTPUTS_DIR}/diff.stl",
+            "--tolerance %s" % ctx.attr.tolerance,
         ])
     )
 
@@ -178,6 +179,17 @@ List of code snippets that are expected to fail an assertion. The test will fail
 if any of these fail to trigger an assertion
 """,
         ),
+        "tolerance": attr.string(
+            default = "0.001",
+            doc = """
+Differences between the rendered object and the golden STL that are thinner
+than this, in the units of the model, are ignored. This absorbs the rounding in
+golden files, which varies with the OpenSCAD version that wrote them and grows
+with the size of the model (a golden file keeps about 6 significant digits).
+Raise it if a large model fails with only a thin skin of differences.
+A string because Starlark has no floating point type.
+""",
+        ),
         "_unittest_binary": attr.label(
             default = Label("//:scad_unittest"),
             executable = True,
@@ -190,7 +202,12 @@ Test for 3D objects and libraries
 The test works by compiling the code provided in the tests attribute, and
 comparing it with the provided golden STL file. If the 2 objects are equal then
 the test passes, if they aren't then the test fails. 2 objects (A and B) are
-defined equal if A-B is empty (B includes A) and B-A is empty (A includes B)
+defined equal if A-B is empty (B includes A) and B-A is empty (A includes B),
+ignoring differences thinner than the tolerance attribute
+
+When the test fails it writes the rendered STL, the parts that are new, the
+parts that are missing, and a diff.stl with both of those to the undeclared test
+outputs (`bazel-testlogs/<test>/test.outputs/`)
 
 The test also checks that assertions are triggered for all the code provided in
 the assertions list

@@ -84,7 +84,7 @@ Create a 3D object based on the provided code and libraries
 <pre>
 load("@rules_openscad//:scad.bzl", "scad_test")
 
-scad_test(<a href="#scad_test-name">name</a>, <a href="#scad_test-assertions">assertions</a>, <a href="#scad_test-library_under_test">library_under_test</a>, <a href="#scad_test-tests">tests</a>)
+scad_test(<a href="#scad_test-name">name</a>, <a href="#scad_test-assertions">assertions</a>, <a href="#scad_test-library_under_test">library_under_test</a>, <a href="#scad_test-tests">tests</a>, <a href="#scad_test-tolerance">tolerance</a>)
 </pre>
 
 Test for 3D objects and libraries
@@ -92,7 +92,12 @@ Test for 3D objects and libraries
 The test works by compiling the code provided in the tests attribute, and
 comparing it with the provided golden STL file. If the 2 objects are equal then
 the test passes, if they aren't then the test fails. 2 objects (A and B) are
-defined equal if A-B is empty (B includes A) and B-A is empty (A includes B)
+defined equal if A-B is empty (B includes A) and B-A is empty (A includes B),
+ignoring differences thinner than the tolerance attribute
+
+When the test fails it writes the rendered STL, the parts that are new, the
+parts that are missing, and a diff.stl with both of those to the undeclared test
+outputs (`bazel-testlogs/<test>/test.outputs/`)
 
 The test also checks that assertions are triggered for all the code provided in
 the assertions list
@@ -105,7 +110,8 @@ the assertions list
 | <a id="scad_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="scad_test-assertions"></a>assertions |  List of code snippets that are expected to fail an assertion. The test will fail if any of these fail to trigger an assertion   | List of strings | optional |  `[]`  |
 | <a id="scad_test-library_under_test"></a>library_under_test |  Library that will be imported when compiling any code under test   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="scad_test-tests"></a>tests |  List of testcases. The key is the filename of the golden STL for this testcase, and the value is the code under test (which object will be compiled) without the library under test being imported (that's done by the  framework)<br><br>The test will fail if any of the code snippets under test create a result that is different from the golden STL for that testcase   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | required |  |
+| <a id="scad_test-tests"></a>tests |  List of testcases. The key is the filename of the golden STL for this testcase, and the value is the code under test (which object will be compiled) without the library under test being imported (that's done by the  framework)<br><br>The test will fail if any of the code snippets under test create a result that is different from the golden STL for that testcase   | <a href="https://bazel.build/rules/lib/core/dict">Dictionary: Label -> String</a> | required |  |
+| <a id="scad_test-tolerance"></a>tolerance |  Differences between the rendered object and the golden STL that are thinner than this, in the units of the model, are ignored. This absorbs the rounding in golden files, which varies with the OpenSCAD version that wrote them and grows with the size of the model (a golden file keeps about 6 significant digits). Raise it if a large model fails with only a thin skin of differences. A string because Starlark has no floating point type.   | String | optional |  `"0.001"`  |
 
 
 #### Example test
