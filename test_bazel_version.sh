@@ -55,6 +55,12 @@ set -euo pipefail
     # they cannot touch or be confused with the Bazel that is running this test.
     output_user_root="${TEST_TMPDIR}/bazel_output_user_root"
 
+    # The nested Bazel starts with an empty cache of downloads, which makes it refetch everything
+    # from the network on every run and fail whenever a host is down. Share the user's own
+    # repository cache instead (Bazel's default location on Linux): it is keyed by content hash,
+    # so what the nested Bazel finds there is exactly what it asked for.
+    repository_cache="${HOME:?}/.cache/bazel/_bazel_${USER:?}/cache/repos/v1"
+
     run_bazel() {
         bazel "--output_user_root=${output_user_root}" "$@"
     }
@@ -78,15 +84,15 @@ set -euo pipefail
     fi
 
     echo "Testing local directory"
-    (cd "$work" && run_bazel build :all)
+    (cd "$work" && run_bazel build "--repository_cache=${repository_cache}" :all)
     # Add this if there is unit testing on this directory in the future
     # (cd "$work" && run_bazel test --test_output=errors :all)
 
     echo "Testing remote usage"
     (
         cd "${work}/test_models"
-        run_bazel build ...
-        run_bazel test --test_output=errors ...
+        run_bazel build "--repository_cache=${repository_cache}" ...
+        run_bazel test "--repository_cache=${repository_cache}" --test_output=errors ...
     )
 
     echo "Test passed with ${version_output}"
