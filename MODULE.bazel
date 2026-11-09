@@ -1,7 +1,6 @@
 module(
     name = "rules_openscad",
     version = "0.1",
-    compatibility_level = 0,
 )
 
 # Only needed to generate the docs (//docs); no package a consumer loads depends on it.
