@@ -3,3 +3,6 @@ module(
     version = "0.1",
     compatibility_level = 0,
 )
+
+# Only needed to generate the docs (//docs); no package a consumer loads depends on it.
+bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True)
