@@ -126,19 +126,12 @@ def _scad_test_impl(ctx):
     return [DefaultInfo(
         executable = unittest_script,
         runfiles = ctx.runfiles(
-            files = [],
-            transitive_files = depset(
-                direct = ctx.files.tests + [unittest_script],
-                transitive = [
-                    ctx.attr.library_under_test.files, 
-                    depset([
-                        ctx.attr._unittest_binary[PyRuntimeInfo].interpreter,
-                    ]),
-                    ctx.attr._unittest_binary.files,
-                    ctx.attr._unittest_binary[PyInfo].transitive_sources,
-                    ctx.attr._unittest_binary[PyRuntimeInfo].files,
-                ],
-            ),
+            files = ctx.files.tests + [unittest_script],
+            transitive_files = ctx.attr.library_under_test.files,
+        ).merge(
+            # Everything scad_unittest needs to run: its sources, the Python runtime and, with
+            # newer rules_python, the bootstrap script its launcher execs
+            ctx.attr._unittest_binary[DefaultInfo].default_runfiles,
         ),
     )]
 

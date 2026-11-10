@@ -9,9 +9,10 @@
 set -euo pipefail
 
 {
-    # The nested Bazel builds the root workspace, which contains this test. It only builds it
-    # (`bazel test` only runs in test_models/, which doesn't depend on this test), but if anything
-    # ever ran it again it would start another nested Bazel, and so on forever. Refuse instead.
+    # The nested Bazel works on a copy of the workspace that contains this test. The copy leaves
+    # out tests/ and the nested Bazel only builds :all and runs the tests of test_models, so
+    # nothing in there can start this test again. If something ever did, it would start another
+    # nested Bazel, and so on forever. Refuse instead.
     if [[ -n "${RULES_OPENSCAD_NESTED_BAZEL_TEST:-}" ]]; then
         echo "ERROR: this test is being run from inside itself" >&2
         exit 1
@@ -55,9 +56,8 @@ set -euo pipefail
     mkdir -p "${work}/test_models"
     cp -rL "${root_src}/." "${work}/"
     cp -rL "${test_models_src}/." "${work}/test_models/"
-    # The runfiles also hold this test's launcher, a file named like the test target. Left in the
-    # copy it would be picked up by the glob of the sources and make the target depend on itself.
-    rm -f "${work}/${TEST_TARGET##*:}"
+    # tests/ holds this test and its launcher; the nested workspace is the sources without it
+    rm -rf "${work}/tests"
 
     # Keep the nested Bazel's outputs (and its servers) inside the test's own directory so that
     # they cannot touch or be confused with the Bazel that is running this test.
