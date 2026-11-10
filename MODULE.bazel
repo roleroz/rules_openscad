@@ -1,6 +1,6 @@
 module(
     name = "rules_openscad",
-    version = "0.1",
+    version = "0.3",
 )
 
 # Bazel 9 removed the Python and shell rules from Bazel itself

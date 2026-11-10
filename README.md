@@ -13,7 +13,7 @@ In order to use these rules in your BUILD files you need to first add this modul
 ### Modify your MODULE.bazel file
 Just add the following line to your `MODULES.bazel` file
 ```
-bazel_dep(name="rules_openscad", version="0.1")
+bazel_dep(name="rules_openscad", version="0.3")
 ```
 
 ### Load the rule definitions on your BUILD files
