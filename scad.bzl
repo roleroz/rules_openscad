@@ -8,6 +8,17 @@ There are 3 rules in this library:
   submitted into git
 """
 
+load(":toolchain.bzl", "OPENSCAD_TOOLCHAIN_TYPE")
+
+# The toolchain is optional: without one, the rules use the openscad on the
+# host's PATH, as they always have.
+_TOOLCHAINS = [config_common.toolchain_type(OPENSCAD_TOOLCHAIN_TYPE, mandatory = False)]
+
+def _openscad(ctx):
+    """The registered OpenscadInfo, or None to use the host's openscad."""
+    tc = ctx.toolchains[OPENSCAD_TOOLCHAIN_TYPE]
+    return tc.openscad if tc else None
+
 srcs_attrs = attr.label_list(
     mandatory = True,
     allow_empty = False,
@@ -57,16 +68,28 @@ def _scad_object_impl(ctx):
     deps = []
     for one_transitive_dep in [dep[DefaultInfo].files for dep in ctx.attr.deps]:
         deps += one_transitive_dep.to_list()
-    ctx.actions.run_shell(
-        outputs = [stl_output],
-        inputs = stl_inputs + deps,
-        use_default_shell_env = True,
-        command = "{} --export-format=stl -o {} {}".format(
-            _get_openscad_command(ctx),
-            stl_output.path,
-            " ".join([f.path for f in stl_inputs]),
-        ),
-    )
+    openscad = _openscad(ctx)
+    if openscad:
+        ctx.actions.run(
+            executable = openscad.openscad,
+            arguments = ["--export-format=stl", "-o", stl_output.path] +
+                        [f.path for f in stl_inputs],
+            outputs = [stl_output],
+            inputs = depset(stl_inputs + deps, transitive = [openscad.data]),
+            mnemonic = "OpenScad",
+            progress_message = "Rendering %{label} with OpenSCAD",
+        )
+    else:
+        ctx.actions.run_shell(
+            outputs = [stl_output],
+            inputs = stl_inputs + deps,
+            use_default_shell_env = True,
+            command = "{} --export-format=stl -o {} {}".format(
+                _get_openscad_command(ctx),
+                stl_output.path,
+                " ".join([f.path for f in stl_inputs]),
+            ),
+        )
     files = depset(
         ctx.files.srcs + [stl_output],
         transitive = [dep[DefaultInfo].files for dep in ctx.attr.deps])
@@ -89,7 +112,11 @@ scad_object = rule(
     },
     doc = """
 Create a 3D object based on the provided code and libraries
+
+It uses the OpenSCAD toolchain when one is registered (see toolchain.bzl),
+and the openscad on the host's PATH otherwise.
 """,
+    toolchains = _TOOLCHAINS,
 )
 
 def _scad_test_impl(ctx):
@@ -97,12 +124,21 @@ def _scad_test_impl(ctx):
     unittest_script = ctx.actions.declare_file(
         "%s_unittest_script.sh" % ctx.label.name)
     unittest_binary = ctx.executable._unittest_binary
+    openscad = _openscad(ctx)
+    if openscad:
+        # A path in the test's runfiles, from its working directory. A bare
+        # name would be looked up on the PATH, so it starts with ./ or ../.
+        openscad_command = openscad.openscad.executable.short_path
+        if not openscad_command.startswith("../"):
+            openscad_command = "./" + openscad_command
+    else:
+        openscad_command = _get_openscad_command(ctx)
     ctx.actions.write(
         output = unittest_script,
         is_executable = True,
         content = "#!/bin/bash\n" + " ".join([
             unittest_binary.short_path,
-            "--openscad_command '%s'" % _get_openscad_command(ctx),
+            "--openscad_command '%s'" % openscad_command,
             "--scad_file_under_test %s" % ctx.files.library_under_test[0].path,
             " ".join([
                 "--testcases \"%s#%s/%s\"" % (
@@ -132,6 +168,9 @@ def _scad_test_impl(ctx):
             # Everything scad_unittest needs to run: its sources, the Python runtime and, with
             # newer rules_python, the bootstrap script its launcher execs
             ctx.attr._unittest_binary[DefaultInfo].default_runfiles,
+        ).merge(
+            # The toolchain's openscad and what it needs, if one is registered
+            openscad.runfiles if openscad else ctx.runfiles(),
         ),
     )]
 
@@ -201,5 +240,9 @@ outputs (`bazel-testlogs/<test>/test.outputs/`)
 
 The test also checks that assertions are triggered for all the code provided in
 the assertions list
+
+It uses the OpenSCAD toolchain when one is registered (see toolchain.bzl),
+and the openscad on the host's PATH otherwise.
 """,
+    toolchains = _TOOLCHAINS,
 )
